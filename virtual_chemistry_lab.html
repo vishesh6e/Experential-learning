@@ -1,543 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
 
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600&display=swap');
+<head>
+    <title>Simple Chem Lab</title>
+    <!-- <link rel="stylesheet" href="style.css"> -->
+</head>
 
-  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+<body>
 
-  .lab-root {
-    font-family: 'Rajdhani', sans-serif;
-    background: #0d1117;
-    min-height: 600px;
-    display: flex;
-    flex-direction: column;
-    color: #c9d1d9;
-    overflow: hidden;
-  }
+    <!-- Top Header -->
+    <header>
+        <h1>⚗️ Virtual Lab</h1>
+    </header>
 
-  .lab-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 18px;
-    background: #161b22;
-    border-bottom: 1px solid #30363d;
-  }
+    <main>
+        <!-- Left Panel (Chemicals to drag) -->
+        <div class="panel">
+            <h2>Chemicals</h2>
 
-  .lab-title {
-    font-size: 13px;
-    font-family: 'Share Tech Mono', monospace;
-    color: #58a6ff;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-  }
+            <div class="item" draggable="true">
+                <span class="icon">🔴</span>
+                <div class="name">
+                    <strong>HCl</strong>
+                    <br>
+                    <small>Acid</small>
+                </div>
+                <span class="tag red">Danger</span>
+            </div>
 
-  .lab-status {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 11px;
-    color: #3fb950;
-    padding: 3px 8px;
-    border: 1px solid #238636;
-    border-radius: 4px;
-  }
+            <div class="item" draggable="true">
+                <span class="icon">🔵</span>
+                <div class="name">
+                    <strong>NaOH</strong>
+                    <br>
+                    <small>Base</small>
+                </div>
+                <span class="tag red">Danger</span>
+            </div>
 
-  .lab-body {
-    display: flex;
-    flex: 1;
-    min-height: 0;
-  }
+            <div class="item" draggable="true">
+                <span class="icon">⚪</span>
+                <div class="name">
+                    <strong>NaCl</strong>
+                    <br>
+                    <small>Salt</small>
+                </div>
+                <span class="tag green">Safe</span>
+            </div>
+        </div>
 
-  .chemicals-panel {
-    width: 200px;
-    background: #161b22;
-    border-right: 1px solid #30363d;
-    padding: 12px 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    overflow-y: auto;
-  }
+        <!-- Right Workspace (Places to drop) -->
+        <div class="workspace">
+            <div class="zones">
+                <div class="drop-zone">
+                    <span class="big-icon">🧪</span>
+                    <p>Mixing Beaker</p>
+                </div>
 
-  .panel-label {
-    font-size: 10px;
-    font-family: 'Share Tech Mono', monospace;
-    color: #8b949e;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    padding: 0 2px 6px;
-    border-bottom: 1px solid #21262d;
-    margin-bottom: 4px;
-  }
+                <div class="drop-zone">
+                    <span class="big-icon">🔥</span>
+                    <p>Heating Station</p>
+                </div>
 
-  .chem-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: #21262d;
-    border: 1px solid #30363d;
-    border-radius: 6px;
-    padding: 7px 10px;
-    cursor: grab;
-    transition: border-color 0.15s, background 0.15s;
-    position: relative;
-  }
+                <div class="drop-zone">
+                    <span class="big-icon">🔬</span>
+                    <p>Microscope</p>
+                </div>
 
-  .chem-item:hover {
-    border-color: #58a6ff;
-    background: #1c2230;
-  }
+                <div class="drop-zone">
+                    <span class="big-icon">🗑️</span>
+                    <p>Waste Bin</p>
+                </div>
+            </div>
 
-  .chem-item:active { cursor: grabbing; }
+            <!-- Log at the bottom -->
+            <div class="log">
+                <p>Ready. Drag items to stations.</p>
+            </div>
+        </div>
+    </main>
 
-  .chem-item.dragging {
-    opacity: 0.4;
-  }
+</body>
 
-  .chem-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-
-  .chem-name {
-    font-size: 13px;
-    font-weight: 600;
-    color: #e6edf3;
-    flex: 1;
-  }
-
-  .chem-formula {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 10px;
-    color: #8b949e;
-  }
-
-  .lab-workspace {
-    flex: 1;
-    position: relative;
-    background: #0d1117;
-    background-image:
-      linear-gradient(rgba(48,54,61,0.3) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(48,54,61,0.3) 1px, transparent 1px);
-    background-size: 24px 24px;
-    overflow: hidden;
-  }
-
-  .drop-zone {
-    position: absolute;
-    border: 2px dashed #30363d;
-    border-radius: 10px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-end;
-    padding-bottom: 10px;
-    transition: border-color 0.2s, background 0.2s;
-    cursor: default;
-  }
-
-  .drop-zone.over {
-    border-color: #58a6ff;
-    background: rgba(88,166,255,0.06);
-  }
-
-  .drop-zone.has-content {
-    border-color: #238636;
-  }
-
-  .zone-label {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 10px;
-    color: #8b949e;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    margin-top: 6px;
-  }
-
-  .beaker-svg {
-    pointer-events: none;
-    position: relative;
-  }
-
-  .liquid-fill {
-    transition: height 0.5s ease, fill 0.5s ease;
-  }
-
-  .zone-contents {
-    font-size: 10px;
-    font-family: 'Share Tech Mono', monospace;
-    color: #58a6ff;
-    margin-top: 3px;
-    text-align: center;
-    padding: 0 4px;
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .zone-title {
-    position: absolute;
-    top: 8px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 10px;
-    font-family: 'Share Tech Mono', monospace;
-    color: #6e7681;
-    letter-spacing: 1px;
-    white-space: nowrap;
-  }
-
-  .equipment-label {
-    font-size: 9px;
-    color: #6e7681;
-    margin-top: 2px;
-    font-family: 'Share Tech Mono', monospace;
-  }
-
-  .drag-ghost {
-    position: fixed;
-    pointer-events: none;
-    z-index: 9999;
-    opacity: 0.85;
-    transform: rotate(5deg) scale(1.05);
-    transition: transform 0.1s;
-    background: #161b22;
-    border: 1px solid #58a6ff;
-    border-radius: 8px;
-    padding: 6px 10px;
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    color: #e6edf3;
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    box-shadow: 0 4px 20px rgba(88,166,255,0.25);
-  }
-
-  .reaction-panel {
-    width: 190px;
-    background: #161b22;
-    border-left: 1px solid #30363d;
-    padding: 12px 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    overflow-y: auto;
-  }
-
-  .reaction-entry {
-    background: #21262d;
-    border-radius: 6px;
-    padding: 8px 10px;
-    border-left: 3px solid #238636;
-  }
-
-  .reaction-eq {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 11px;
-    color: #3fb950;
-    word-break: break-all;
-    line-height: 1.5;
-  }
-
-  .reaction-name {
-    font-size: 12px;
-    font-weight: 600;
-    color: #e6edf3;
-    margin-bottom: 3px;
-  }
-
-  .reaction-empty {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 11px;
-    color: #6e7681;
-    text-align: center;
-    margin-top: 20px;
-  }
-
-  .burner-svg { position: absolute; pointer-events: none; }
-  .flame { animation: flicker 0.6s ease-in-out infinite alternate; transform-origin: 50% 100%; }
-  @keyframes flicker {
-    from { transform: scaleX(1) scaleY(1); opacity: 1; }
-    to   { transform: scaleX(0.85) scaleY(1.12); opacity: 0.8; }
-  }
-
-  .bubble {
-    position: absolute;
-    border-radius: 50%;
-    opacity: 0;
-    animation: rise 1.8s ease-in infinite;
-  }
-  @keyframes rise {
-    0%   { opacity: 0.5; transform: translateY(0) scale(1); }
-    100% { opacity: 0; transform: translateY(-40px) scale(0.4); }
-  }
-</style>
-
-<div class="lab-root" id="labRoot">
-  <div class="lab-header">
-    <span class="lab-title">Virtual Chemistry Lab — v2.4</span>
-    <span class="lab-status" id="labStatusBadge">READY</span>
-  </div>
-  <div class="lab-body">
-
-    <div class="chemicals-panel">
-      <div class="panel-label">Chemicals</div>
-    </div>
-
-    <div class="lab-workspace" id="workspace">
-    </div>
-
-    <div class="reaction-panel">
-      <div class="panel-label">Reactions</div>
-      <div class="reaction-empty" id="reactionEmpty">// drop chemicals<br>// into beakers<br>// to react</div>
-    </div>
-
-  </div>
-</div>
-
-<script>
-const CHEMICALS = [
-  { id:'hcl',  name:'Hydrochloric Acid', formula:'HCl',   color:'#e8c97a', dot:'#e8c97a' },
-  { id:'naoh', name:'Sodium Hydroxide',  formula:'NaOH',  color:'#7ab8e8', dot:'#7ab8e8' },
-  { id:'h2o2', name:'Hydrogen Peroxide', formula:'H₂O₂',  color:'#a8e89c', dot:'#5fb955' },
-  { id:'cuso4',name:'Copper Sulfate',    formula:'CuSO₄', color:'#4fa0d8', dot:'#2980b9' },
-  { id:'nacl', name:'Sodium Chloride',   formula:'NaCl',  color:'#e8e8d0', dot:'#b8b89a' },
-  { id:'h2so4',name:'Sulfuric Acid',     formula:'H₂SO₄', color:'#f0a060', dot:'#d4601a' },
-  { id:'kmno4',name:'Potassium Perm.',   formula:'KMnO₄', color:'#c97aee', dot:'#9b3dbf' },
-  { id:'naHCO3',name:'Baking Soda',      formula:'NaHCO₃',color:'#e0dfd5', dot:'#8a8a7a' },
-];
-
-const REACTIONS = {
-  'hcl+naoh':   { name:'Neutralisation', eq:'HCl + NaOH → NaCl + H₂O', color:'#8bc4e8' },
-  'naoh+hcl':   { name:'Neutralisation', eq:'NaOH + HCl → NaCl + H₂O', color:'#8bc4e8' },
-  'hcl+naHCO3': { name:'Acid-Base Reaction', eq:'HCl + NaHCO₃ → NaCl + H₂O + CO₂↑', color:'#e0f0e0' },
-  'naHCO3+hcl': { name:'Acid-Base Reaction', eq:'NaHCO₃ + HCl → NaCl + H₂O + CO₂↑', color:'#e0f0e0' },
-  'h2so4+naoh': { name:'Strong Neutralisation', eq:'H₂SO₄ + 2NaOH → Na₂SO₄ + 2H₂O', color:'#b0d8f0' },
-  'naoh+h2so4': { name:'Strong Neutralisation', eq:'2NaOH + H₂SO₄ → Na₂SO₄ + 2H₂O', color:'#b0d8f0' },
-  'kmno4+h2o2': { name:'Redox Reaction', eq:'2KMnO₄ + 5H₂O₂ → MnO₂ + O₂↑', color:'#d4a0e0' },
-  'h2o2+kmno4': { name:'Redox Reaction', eq:'5H₂O₂ + 2KMnO₄ → MnO₂ + O₂↑', color:'#d4a0e0' },
-  'cuso4+naoh': { name:'Precipitation', eq:'CuSO₄ + 2NaOH → Cu(OH)₂↓ + Na₂SO₄', color:'#4fa8d0' },
-  'naoh+cuso4': { name:'Precipitation', eq:'2NaOH + CuSO₄ → Cu(OH)₂↓ + Na₂SO₄', color:'#4fa8d0' },
-  'h2so4+nacl': { name:'Salt Reaction', eq:'H₂SO₄ + 2NaCl → Na₂SO₄ + 2HCl↑', color:'#f0c080' },
-  'nacl+h2so4': { name:'Salt Reaction', eq:'2NaCl + H₂SO₄ → Na₂SO₄ + 2HCl↑', color:'#f0c080' },
-};
-
-const ZONES = [
-  { id:'z1', x:40,  y:80,  w:120, h:160, label:'Beaker A', type:'beaker-large' },
-  { id:'z2', x:200, y:100, w:100, h:130, label:'Beaker B', type:'beaker-medium' },
-  { id:'z3', x:330, y:60,  w:130, h:180, label:'Flask C',  type:'flask' },
-  { id:'z4', x:490, y:110, w:90,  h:110, label:'Vial D',   type:'vial' },
-];
-
-const zoneContents = {};
-const reactions = [];
-let dragData = null;
-let ghost = null;
-
-function beakerSVG(w, h, liquid, liquidColor, type) {
-  const lh = liquid * (h - 30);
-  const ly = h - 20 - lh;
-  if (type === 'flask') {
-    const bw = w * 0.55, bx = (w - bw) / 2;
-    const neckW = w * 0.25, neckX = (w - neckW) / 2;
-    return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
-      <defs><clipPath id="flaskClip${w}">
-        <path d="M${neckX},10 L${neckX},${h*0.35} L${bx},${h*0.85} Q${w*0.1},${h} ${w*0.5},${h} Q${w*0.9},${h} ${w-bx},${h*0.85} L${neckX+neckW},${h*0.35} L${neckX+neckW},10 Z"/>
-      </clipPath></defs>
-      <rect x="${neckX}" y="${ly}" width="${neckW}" height="${lh}" fill="${liquidColor}" opacity="0.7" clip-path="url(#flaskClip${w})"/>
-      <rect x="${bx}" y="${ly}" width="${bw}" height="${lh}" fill="${liquidColor}" opacity="0.7" clip-path="url(#flaskClip${w})"/>
-      <path d="M${neckX},10 L${neckX},${h*0.35} L${bx},${h*0.85} Q${w*0.1},${h} ${w*0.5},${h} Q${w*0.9},${h} ${w-bx},${h*0.85} L${neckX+neckW},${h*0.35} L${neckX+neckW},10" fill="none" stroke="#8b949e" stroke-width="1.5"/>
-      <line x1="${neckX-4}" y1="10" x2="${neckX+neckW+4}" y2="10" stroke="#8b949e" stroke-width="2"/>
-    </svg>`;
-  }
-  if (type === 'vial') {
-    return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
-      <defs><clipPath id="vialClip${w}"><rect x="${w*0.15}" y="5" width="${w*0.7}" height="${h-10}" rx="4"/></clipPath></defs>
-      <rect x="${w*0.15}" y="${ly}" width="${w*0.7}" height="${lh}" fill="${liquidColor}" opacity="0.75" clip-path="url(#vialClip${w})"/>
-      <rect x="${w*0.15}" y="5" width="${w*0.7}" height="${h-10}" rx="4" fill="none" stroke="#8b949e" stroke-width="1.5"/>
-      <rect x="${w*0.15-4}" y="3" width="${w*0.7+8}" height="6" rx="2" fill="#30363d" stroke="#8b949e" stroke-width="1"/>
-    </svg>`;
-  }
-  const brimY = 18, baseY = h - 12;
-  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
-    <defs><clipPath id="bClip${w}${h}">
-      <path d="M12,${brimY} L${w*0.12},${baseY} Q${w*0.15},${baseY+8} ${w*0.5},${baseY+8} Q${w*0.85},${baseY+8} ${w*0.88},${baseY} L${w-12},${brimY} Z"/>
-    </clipPath></defs>
-    <rect x="12" y="${ly}" width="${w-24}" height="${lh}" fill="${liquidColor}" opacity="0.75" clip-path="url(#bClip${w}${h})"/>
-    <path d="M12,${brimY} L${w*0.12},${baseY} Q${w*0.15},${baseY+8} ${w*0.5},${baseY+8} Q${w*0.85},${baseY+8} ${w*0.88},${baseY} L${w-12},${brimY}" fill="none" stroke="#8b949e" stroke-width="1.5"/>
-    <line x1="6" y1="${brimY}" x2="${w-6}" y2="${brimY}" stroke="#8b949e" stroke-width="2"/>
-  </svg>`;
-}
-
-function renderZone(zone) {
-  const el = document.getElementById('zone_' + zone.id);
-  const contents = zoneContents[zone.id] || [];
-  const liquid = Math.min(contents.length / 3, 1);
-  let lColor = '#2a4060';
-  if (contents.length > 0) {
-    const c = CHEMICALS.find(c => c.id === contents[contents.length - 1]);
-    if (c) lColor = c.color + 'aa';
-    if (contents.length === 2) {
-      const key = contents[0] + '+' + contents[1];
-      const r = REACTIONS[key];
-      if (r) lColor = r.color + 'cc';
-    }
-  }
-  el.querySelector('.beaker-svg').innerHTML = beakerSVG(zone.w, zone.h - 50, liquid, lColor, zone.type);
-  const cd = el.querySelector('.zone-contents');
-  cd.textContent = contents.map(id => CHEMICALS.find(c => c.id === id)?.formula || id).join(' + ');
-}
-
-function addReaction(name, eq, color) {
-  const panel = document.querySelector('.reaction-panel');
-  const empty = document.getElementById('reactionEmpty');
-  if (empty) empty.remove();
-  const entry = document.createElement('div');
-  entry.className = 'reaction-entry';
-  entry.style.borderLeftColor = color || '#238636';
-  entry.innerHTML = `<div class="reaction-name">${name}</div><div class="reaction-eq">${eq}</div>`;
-  panel.appendChild(entry);
-  reactions.push(eq);
-  document.getElementById('labStatusBadge').textContent = 'REACTION!';
-  setTimeout(() => document.getElementById('labStatusBadge').textContent = 'READY', 2000);
-}
-
-function spawnBubbles(zone) {
-  const ws = document.getElementById('workspace');
-  for (let i = 0; i < 4; i++) {
-    setTimeout(() => {
-      const b = document.createElement('div');
-      b.className = 'bubble';
-      b.style.width = b.style.height = (4 + Math.random() * 6) + 'px';
-      b.style.left = (zone.x + zone.w * 0.3 + Math.random() * zone.w * 0.4) + 'px';
-      b.style.top = (zone.y + zone.h * 0.4) + 'px';
-      b.style.background = '#58a6ff';
-      b.style.animationDelay = (Math.random() * 0.5) + 's';
-      ws.appendChild(b);
-      setTimeout(() => b.remove(), 2200);
-    }, i * 180);
-  }
-}
-
-function setupChemicals() {
-  const panel = document.querySelector('.chemicals-panel');
-  const label = panel.querySelector('.panel-label');
-  CHEMICALS.forEach(chem => {
-    const item = document.createElement('div');
-    item.className = 'chem-item';
-    item.draggable = true;
-    item.dataset.chemId = chem.id;
-    item.innerHTML = `<div class="chem-dot" style="background:${chem.dot}"></div>
-      <div style="flex:1"><div class="chem-name">${chem.name}</div><div class="chem-formula">${chem.formula}</div></div>`;
-    item.addEventListener('dragstart', e => {
-      dragData = { chemId: chem.id, chem };
-      item.classList.add('dragging');
-      e.dataTransfer.effectAllowed = 'copy';
-      createGhost(e, chem);
-    });
-    item.addEventListener('dragend', e => {
-      item.classList.remove('dragging');
-      removeGhost();
-    });
-    panel.appendChild(item);
-  });
-}
-
-function createGhost(e, chem) {
-  ghost = document.createElement('div');
-  ghost.className = 'drag-ghost';
-  ghost.innerHTML = `<div style="width:10px;height:10px;border-radius:50%;background:${chem.dot};flex-shrink:0"></div>${chem.formula}`;
-  document.body.appendChild(ghost);
-  positionGhost(e);
-  document.addEventListener('dragover', positionGhost);
-}
-
-function positionGhost(e) {
-  if (!ghost) return;
-  ghost.style.left = (e.clientX + 12) + 'px';
-  ghost.style.top  = (e.clientY - 10) + 'px';
-}
-
-function removeGhost() {
-  if (ghost) { ghost.remove(); ghost = null; }
-  document.removeEventListener('dragover', positionGhost);
-}
-
-function setupZones() {
-  const ws = document.getElementById('workspace');
-  ws.addEventListener('dragover', e => e.preventDefault());
-
-  ZONES.forEach(zone => {
-    const el = document.createElement('div');
-    el.className = 'drop-zone';
-    el.id = 'zone_' + zone.id;
-    el.style.left = zone.x + 'px';
-    el.style.top  = zone.y + 'px';
-    el.style.width = zone.w + 'px';
-    el.style.height = zone.h + 'px';
-
-    el.innerHTML = `<div class="zone-title">${zone.label}</div>
-      <div class="beaker-svg">${beakerSVG(zone.w, zone.h - 50, 0, '#2a4060', zone.type)}</div>
-      <div class="zone-contents"></div>
-      <div class="equipment-label">${zone.type.replace('-',' ')}</div>`;
-
-    el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('over'); });
-    el.addEventListener('dragleave', () => el.classList.remove('over'));
-    el.addEventListener('drop', e => {
-      e.preventDefault();
-      el.classList.remove('over');
-      if (!dragData) return;
-      const contents = zoneContents[zone.id] || [];
-      if (contents.includes(dragData.chemId)) return;
-      if (contents.length >= 2) return;
-      const prev = contents[0];
-      contents.push(dragData.chemId);
-      zoneContents[zone.id] = contents;
-      el.classList.add('has-content');
-      renderZone(zone);
-      if (contents.length === 2) {
-        const key = prev + '+' + dragData.chemId;
-        const r = REACTIONS[key];
-        if (r) { addReaction(r.name, r.eq, r.color); spawnBubbles(zone); }
-      }
-      dragData = null;
-    });
-
-    el.addEventListener('dblclick', () => {
-      zoneContents[zone.id] = [];
-      el.classList.remove('has-content');
-      renderZone(zone);
-    });
-
-    ws.appendChild(el);
-  });
-
-  addBurner(ws, 60, 245);
-  addBurner(ws, 215, 235);
-}
-
-function addBurner(ws, x, y) {
-  const s = document.createElementNS('http://www.w3.org/2000/svg','svg');
-  s.setAttribute('width','60'); s.setAttribute('height','40');
-  s.setAttribute('viewBox','0 0 60 40');
-  s.className.baseVal = 'burner-svg';
-  s.style.left = x + 'px'; s.style.top = y + 'px';
-  s.style.position = 'absolute'; s.style.pointerEvents = 'none';
-  s.innerHTML = `
-    <rect x="5" y="28" width="50" height="10" rx="3" fill="#21262d" stroke="#30363d" stroke-width="1"/>
-    <ellipse cx="30" cy="28" rx="22" ry="4" fill="#30363d"/>
-    <g class="flame">
-      <ellipse cx="30" cy="20" rx="6" ry="10" fill="#e85d04" opacity="0.8"/>
-      <ellipse cx="30" cy="22" rx="4" ry="7" fill="#f48c06" opacity="0.9"/>
-      <ellipse cx="30" cy="24" rx="2.5" ry="4" fill="#ffd60a"/>
-    </g>`;
-  ws.appendChild(s);
-}
-
-setupChemicals();
-setupZones();
-ZONES.forEach(z => renderZone(z));
-</script>
+</html>
