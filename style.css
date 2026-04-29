@@ -1,105 +1,147 @@
-/* Styling by [Your Name] - Roll No: 24CS101 */
+:root {
+    --bench: #2c3e50;
+    --accent: #00d2ff;
+    --danger: #ff4b2b;
+}
 
-/* Basic background and center align */
 body {
-    background-color: #e3e3e3;
-    font-family: Arial, Helvetica, sans-serif;
-    margin: 0px;
-    padding: 0px;
-}
-
-/* Header style with some shadow */
-header {
-    background-color: #004080;
+    font-family: 'Segoe UI', sans-serif;
+    background: #121212;
     color: white;
-    padding: 10px;
-    text-align: center;
-    border-bottom: 5px solid #ffa500;
-}
-
-/* Main container using flex to side-by-side */
-main {
+    margin: 0;
     display: flex;
-    padding: 20px;
+    flex-direction: column;
+    height: 100vh;
 }
 
-/* Left side bar for chemicals */
-.panel {
-    width: 25%;
-    background-color: white;
-    border: 2px solid black;
-    padding: 10px;
-    margin-right: 20px;
-}
-
-.panel h2 {
-    text-align: center;
-    text-decoration: underline;
-}
-
-/* Chemical item boxes */
-.item {
-    border: 1px solid gray;
-    margin-bottom: 10px;
-    padding: 10px;
+/* --- UI Layout --- */
+header {
+    padding: 15px 30px;
+    background: #000;
+    border-bottom: 2px solid var(--accent);
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    background-color: #f9f9f9;
+}
+
+.lab-space {
+    display: flex;
+    flex: 1;
+    padding: 20px;
+    gap: 20px;
+}
+
+/* --- Inventory --- */
+.shelf {
+    width: 220px;
+    background: #1e1e1e;
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid #333;
+}
+
+.shelf h3 {
+    color: var(--accent);
+    margin-top: 0;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+}
+
+.item {
+    background: #2a2a2a;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    cursor: grab;
+    text-align: center;
+    border: 1px solid transparent;
+    transition: 0.2s;
 }
 
 .item:hover {
-    background-color: yellow; /* Highlight on hover */
+    border-color: var(--accent);
+    background: #333;
 }
 
-.icon {
-    font-size: 30px;
-    margin-right: 10px;
-}
-
-.name {
+/* --- The Workbench --- */
+.bench {
     flex: 1;
+    background: var(--bench);
+    border-radius: 20px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    position: relative;
+    border: 5px solid #1a252f;
 }
 
-/* Color tags for danger level */
-.tag {
-    font-weight: bold;
-    border: 1px solid black;
-    padding: 2px;
+.slot {
+    width: 180px;
+    height: 250px;
+    border: 2px dashed rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: 0.3s;
 }
 
-.red { color: red; }
-.green { color: green; }
-
-/* Right side workspace */
-.workspace {
-    width: 75%;
+.slot.drag-over {
+    background: rgba(0, 210, 255, 0.1);
+    border-color: var(--accent);
 }
 
-.zones {
-    display: grid;
-    grid-template-columns: 1fr 1fr; /* 2 columns */
-    grid-gap: 20px;
+/* --- Beaker Visuals --- */
+.beaker {
+    width: 60px;
+    height: 80px;
+    border: 3px solid #eee;
+    border-top: none;
+    border-radius: 0 0 12px 12px;
+    position: relative;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.05);
 }
 
-/* Big boxes for dropping things */
-.drop-zone {
-    height: 150px;
-    background-color: white;
-    border: 3px dashed blue;
-    text-align: center;
+.liquid {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 60%;
+    transition: all 1s ease;
+}
+
+/* --- Control Panel --- */
+.controls {
     padding: 20px;
+    background: #000;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
 }
 
-.big-icon {
-    font-size: 50px;
-}
-
-/* Console/Log box at the bottom */
-.log {
-    margin-top: 20px;
-    background-color: black;
-    color: lime;
-    padding: 10px;
+button {
+    padding: 10px 25px;
+    border-radius: 5px;
+    border: none;
     font-weight: bold;
-    border: 2px solid gray;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-mix {
+    background: var(--accent);
+    color: #000;
+}
+
+.btn-reset {
+    background: #444;
+    color: white;
+}
+
+button:hover {
+    opacity: 0.8;
+    transform: translateY(-2px);
 }
