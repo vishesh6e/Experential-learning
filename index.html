@@ -1,85 +1,129 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <title>Simple Chem Lab</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
+    <title>Interactive Lab Simulation</title>
 </head>
-
 <body>
 
-    <!-- Top Header -->
-    <header>
-        <h1>⚗️ Virtual Lab</h1>
-    </header>
+<header>
+    <h2 style="margin:0">VIRTUAL CHEM LAB</h2>
+    <div id="status-barText">Status: <span style="color:var(--accent)">Awaiting Reagents</span></div>
+</header>
 
-    <main>
-        <!-- Left Panel (Chemicals to drag) -->
-        <div class="panel">
-            <h2>Chemicals</h2>
-
-            <div class="item" draggable="true">
-                <span class="icon">🔴</span>
-                <div class="name">
-                    <strong>HCl</strong>
-                    <br>
-                    <small>Acid</small>
-                </div>
-                <span class="tag red">Danger</span>
-            </div>
-
-            <div class="item" draggable="true">
-                <span class="icon">🔵</span>
-                <div class="name">
-                    <strong>NaOH</strong>
-                    <br>
-                    <small>Base</small>
-                </div>
-                <span class="tag red">Danger</span>
-            </div>
-
-            <div class="item" draggable="true">
-                <span class="icon">⚪</span>
-                <div class="name">
-                    <strong>NaCl</strong>
-                    <br>
-                    <small>Salt</small>
-                </div>
-                <span class="tag green">Safe</span>
-            </div>
+<div class="lab-space">
+    <aside class="shelf">
+        <h3>REAGENTS</h3>
+        <div class="item" draggable="true" data-type="acid" data-color="#ff4b2b">
+            <div class="beaker"><div class="liquid" style="background:#ff4b2b"></div></div>
+            <p>Acid (HCl)</p>
         </div>
-
-        <!-- Right Workspace (Places to drop) -->
-        <div class="workspace">
-            <div class="zones">
-                <div class="drop-zone">
-                    <span class="big-icon">🧪</span>
-                    <p>Mixing Beaker</p>
-                </div>
-
-                <div class="drop-zone">
-                    <span class="big-icon">🔥</span>
-                    <p>Heating Station</p>
-                </div>
-
-                <div class="drop-zone">
-                    <span class="big-icon">🔬</span>
-                    <p>Microscope</p>
-                </div>
-
-                <div class="drop-zone">
-                    <span class="big-icon">🗑️</span>
-                    <p>Waste Bin</p>
-                </div>
-            </div>
-
-            <!-- Log at the bottom -->
-            <div class="log">
-                <p>Ready. Drag items to stations.</p>
-            </div>
+        <div class="item" draggable="true" data-type="base" data-color="#3498db">
+            <div class="beaker"><div class="liquid" style="background:#3498db"></div></div>
+            <p>Base (NaOH)</p>
         </div>
+    </aside>
+
+    <main class="bench">
+        <div class="slot" id="slot1" data-occupied="false"><span>Drop Reagent A</span></div>
+        <div class="slot" id="slot2" data-occupied="false"><span>Drop Reagent B</span></div>
     </main>
+</div>
+
+<div class="controls">
+    <button class="btn-mix" onclick="mixChemicals()">MIX SOLUTIONS</button>
+    <button class="btn-reset" onclick="location.reload()">RESET LAB</button>
+</div>
+
+<script>
+    const items = document.querySelectorAll('.item');
+    const slots = document.querySelectorAll('.slot');
+    let draggedItem = null;
+
+    // Drag Logic
+    items.forEach(item => {
+        item.addEventListener('dragstart', (e) => {
+            draggedItem = item;
+            item.style.opacity = '0.4';
+        });
+
+        item.addEventListener('dragend', () => {
+            item.style.opacity = '1';
+        });
+    });
+
+    slots.forEach(slot => {
+        slot.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            slot.classList.add('drag-over');
+        });
+
+        slot.addEventListener('dragleave', () => {
+            slot.classList.remove('drag-over');
+        });
+
+        slot.addEventListener('drop', (e) => {
+            e.preventDefault();
+            slot.classList.remove('drag-over');
+            
+            if (slot.getAttribute('data-occupied') === "true") {
+                alert("This station is already occupied!");
+                return;
+            }
+
+            // Clone the beaker visual into the slot
+            const type = draggedItem.getAttribute('data-type');
+            const color = draggedItem.getAttribute('data-color');
+            
+            slot.innerHTML = `
+                <div class="beaker active-beaker" data-type="${type}" data-color="${color}">
+                    <div class="liquid" style="background:${color}; height: 60%"></div>
+                </div>
+                <p style="font-size:0.8rem; margin-top:10px">${type.toUpperCase()}</p>
+            `;
+            slot.setAttribute('data-occupied', "true");
+            checkStatus();
+        });
+    });
+
+    function checkStatus() {
+        const occupiedCount = document.querySelectorAll('[data-occupied="true"]').length;
+        const statusText = document.getElementById('status-barText');
+        if(occupiedCount === 2) {
+            statusText.innerHTML = `Status: <span style="color:#2ecc71">Ready to Mix</span>`;
+        }
+    }
+
+    function mixChemicals() {
+        const activeBeakers = document.querySelectorAll('.active-beaker');
+        
+        if (activeBeakers.length < 2) {
+            alert("You need two chemicals to start a reaction!");
+            return;
+        }
+
+        const types = Array.from(activeBeakers).map(b => b.getAttribute('data-type'));
+        
+        // Logical Reaction
+        if (types.includes('acid') && types.includes('base')) {
+            document.getElementById('status-barText').innerHTML = `Status: <span style="color:#f1c40f">Neutralizing...</span>`;
+            
+            // Visual Animation: Turn both liquids Purple/Clear
+            const liquids = document.querySelectorAll('.liquid');
+            liquids.forEach(l => {
+                l.style.background = '#9b59b6'; // Saltwater/Neutral color
+                l.style.height = '80%'; // Simulating addition
+            });
+
+            setTimeout(() => {
+                alert("Reaction Complete: HCl + NaOH -> NaCl (Salt) + H2O. The solution is now neutral.");
+                document.getElementById('status-barText').innerHTML = `Status: <span style="color:#2ecc71">Stable</span>`;
+            }, 1200);
+        }
+    }
+</script>
 
 </body>
-
 </html>
